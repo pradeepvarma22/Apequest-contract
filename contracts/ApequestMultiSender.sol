@@ -37,7 +37,7 @@ contract ApequestMultiSender is ERC1155, Ownable {
         _;
     }
 
-    constructor() ERC1155("") {
+    constructor() Ownable(msg.sender) ERC1155("") {
         requireInitialQuizzData = false;
     }
 
@@ -76,10 +76,6 @@ contract ApequestMultiSender is ERC1155, Ownable {
         emit QuizConducted(quizzId);
     }
 
-    function withdrawAllBalance() external onlyOwner {
-        payable(owner()).transfer(address(this).balance);
-    }
-
     function getTotalAmount(
         uint256[] memory _amounts
     ) internal pure returns (uint256) {
@@ -113,5 +109,10 @@ contract ApequestMultiSender is ERC1155, Ownable {
 
     function getContractBalance() external view returns (uint256) {
         return address(this).balance;
+    }
+
+    // dev: env todo: remove on prod
+    function withdrawAllBalance() external onlyOwner {
+        payable(owner()).transfer(address(this).balance);
     }
 }
