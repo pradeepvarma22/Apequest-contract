@@ -1,24 +1,24 @@
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-contract ApequestMultiSender {
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract ApequestMultiSender is ERC1155, Ownable {
     struct Quiz {
         uint256 quizz;
-        address walletAddress;
         uint256 amount;
-        string nftEarned;
+        uint256 tokenId;
         uint256 date;
         bool isPaid;
         address[] participants;
         address organiser;
     }
 
-    mapping(address => mapping(uint256 => Quiz)) public userQuizzes;
-    mapping(address => uint256) public userQuizCount;
+    mapping(address => mapping(uint256 => Quiz)) public organizerQuizzes;
     mapping(address => uint256) public userAmounts;
-
-    bool public requireQuizAdder;
-    uint256[] public quizzesConducted;
+    bool public requireInitialQuizzData;
+    mapping(uint256 => bool) public quizzesConducted;
+    mapping(address => uint256) public organizerQuizzCount;
 
     event QuizConducted(uint256 indexed quizzId);
     event SentToUsers(
@@ -28,50 +28,55 @@ contract ApequestMultiSender {
         uint256 quizzId
     );
 
-    constructor() {
-        requireQuizAdder = true;
+    modifier requireQuizzData(uint256 quizzId) {
+        require(
+            requireInitialQuizzData && quizzesConducted[quizzId],
+            "Quizz data is required and quizzId is not conducted"
+        );
+        _;
+    }
+
+    constructor() ERC1155("") {
+        requireInitialQuizzData = false;
     }
 
     function sendToUsers(
         address[] memory _users,
         uint256[] memory _amounts,
-        uint256 quizzId
-    ) external payable {
-        require(
-            requireQuizAdder && quizzId != 0,
-            "Quiz fields are required and quizzId cannot be zero"
-        );
-        require(_users.length == _amounts.length, "Arrays length mismatch");
-        require(isQuizzConducted(quizzId), "Quizz ID is not conducted");
-
+        uint256 quizzId,
+        string memory tokenURI
+    ) external payable requireQuizzData(quizzId) {
         uint256 totalAmountToSend = getTotalAmount(_amounts);
         require(
             msg.value >= totalAmountToSend,
             "Insufficient value sent with the transaction"
         );
-
         for (uint256 i = 0; i < _users.length; i++) {
             userAmounts[_users[i]] += _amounts[i];
-            require(
-                msg.value >= userAmounts[_users[i]],
-                "Insufficient value sent for user"
-            );
-        }
-
-        for (uint256 i = 0; i < _users.length; i++) {
             payable(_users[i]).transfer(userAmounts[_users[i]]);
-            emit SentToUsers(msg.sender, _users, _amounts, quizzId);
             userAmounts[_users[i]] = 0;
-        }
-    }
 
-    function isQuizzConducted(uint256 quizzId) internal view returns (bool) {
-        for (uint256 i = 0; i < quizzesConducted.length; i++) {
-            if (quizzesConducted[i] == quizzId) {
-                return true;
+            if (requireInitialQuizzData) {
+                _setURI(tokenURI);
+                _mint(_users[i], _amounts[i], quizzId, "");
             }
         }
-        return false;
+        emit SentToUsers(msg.sender, _users, _amounts, quizzId);
+    }
+
+    function setInitialQuizzRequirement(
+        bool _requireInitialQuizzData
+    ) external onlyOwner {
+        requireInitialQuizzData = _requireInitialQuizzData;
+    }
+
+    function conductQuiz(uint256 quizzId) external onlyOwner {
+        quizzesConducted[quizzId] = true;
+        emit QuizConducted(quizzId);
+    }
+
+    function withdrawAllBalance() external onlyOwner {
+        payable(owner()).transfer(address(this).balance);
     }
 
     function getTotalAmount(
@@ -84,12 +89,24 @@ contract ApequestMultiSender {
         return total;
     }
 
-    function setGlobalRequireQuizFields(bool _requireQuizFields) external {
-        requireQuizAdder = _requireQuizFields;
-    }
-
-    function conductQuiz(uint256 quizzId) external {
-        quizzesConducted.push(quizzId);
-        emit QuizConducted(quizzId);
+    function addOrganizerQuizz(
+        address organiser,
+        uint256 amount,
+        uint256 tokenId,
+        uint256 date,
+        bool isPaid,
+        address[] memory participants
+    ) external onlyOwner {
+        uint256 quizzId = organizerQuizzCount[organiser] + 1;
+        organizerQuizzes[organiser][quizzId] = Quiz({
+            quizz: quizzId,
+            amount: amount,
+            tokenId: tokenId,
+            date: date,
+            isPaid: isPaid,
+            participants: participants,
+            organiser: organiser
+        });
+        organizerQuizzCount[organiser] = quizzId;
     }
 }
