@@ -1,5 +1,7 @@
 {
   "name": "apequest",
+  "description": "Apequest",
+  "license": "MIT",
   "author": {
     "name": "Pradeep"
   },

@@ -31,7 +31,7 @@ contract ApequestMultiSender is ERC1155, Ownable {
 
     modifier requireQuizzData(uint256 quizzId) {
         require(
-            requireInitialQuizzData && quizzesConducted[quizzId],
+            !requireInitialQuizzData && !quizzesConducted[quizzId],
             "Quizz data is required and quizzId is not conducted"
         );
         _;
@@ -47,9 +47,10 @@ contract ApequestMultiSender is ERC1155, Ownable {
         uint256 quizzId,
         string memory tokenURI
     ) external payable requireQuizzData(quizzId) {
-        uint256 totalAmountToSend = getTotalAmount(_amounts);
+        uint256 totalAmount = getTotalAmount(_amounts);
+
         require(
-            msg.value >= totalAmountToSend,
+            msg.value >= totalAmount,
             "Insufficient value sent with the transaction"
         );
         for (uint256 i = 0; i < _users.length; i++) {
@@ -107,8 +108,8 @@ contract ApequestMultiSender is ERC1155, Ownable {
         organizerQuizzCount[organiser] = quizzId;
     }
 
-    function getContractBalance() external view returns (uint256) {
-        return address(this).balance;
+    function getContractBalanceInEther() external view returns (uint256) {
+        return address(this).balance / 1 ether;
     }
 
     // dev: env todo: remove on prod

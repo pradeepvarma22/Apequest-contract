@@ -9,11 +9,33 @@ const config: HardhatUserConfig = {
     localhost: {
       url: "http://127.0.0.1:8545",
     },
+    fevm_ipc_mycelium: {
+      url: "https://api.mycelium.calibration.node.glif.io/",
+      accounts: [PRIVATE_KEY],
+      chainId: 2120099022966061,
+    },
     mantle: {
       chainId: 5001,
       accounts: [PRIVATE_KEY],
       url: "https://rpc.testnet.mantle.xyz",
     },
+    scrollSepolia: {
+      chainId: 534351,
+      url: "https://sepolia-rpc.scroll.io",
+      accounts: [PRIVATE_KEY],
+      timeout: 60000000,
+    },
+    arbitrum: {
+      chainId: 421613,
+      url: "https://arbitrum-goerli.publicnode.com",
+      accounts: [PRIVATE_KEY],
+      timeout: 60000000,
+    },
+    mumbai: {
+      chainId: 80001,
+      url: "https://rpc-mumbai.maticvigil.com",
+      accounts: [PRIVATE_KEY],
+    }
   },
   paths: {
     sources: "./contracts",
