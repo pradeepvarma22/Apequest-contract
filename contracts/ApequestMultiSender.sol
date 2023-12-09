@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
@@ -108,5 +109,9 @@ contract ApequestMultiSender is ERC1155, Ownable {
             organiser: organiser
         });
         organizerQuizzCount[organiser] = quizzId;
+    }
+
+    function getContractBalance() external view returns (uint256) {
+        return address(this).balance;
     }
 }
