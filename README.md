@@ -4,8 +4,6 @@
 yarn hardhat compile
 ```
 
-Deployed At:
-
 # FileCoin FEVM InterPlanetary Consensus  IPC:
 
 > yarn hardhat run scripts/deploy.ts --network fevm_ipc_mycelium <br/>
