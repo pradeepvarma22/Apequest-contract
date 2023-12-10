@@ -6,7 +6,7 @@ yarn hardhat compile
 
 Deployed At:
 
-# FileCoin FEVM IPC:
+# FileCoin FEVM InterPlanetary Consensus  IPC:
 
 yarn hardhat run scripts/deploy.ts --network fevm_ipc_mycelium
 Deploying to network: fevm_ipc_mycelium (chainId: 2120099022966061)
@@ -14,6 +14,7 @@ ApequestMultiSender deployed to: 0x623B40bC298A94ff6596ADa2B0d9073b09e6eD85
 Done in 7.09s.
 https://explorer.mycelium.calibration.node.glif.io/address/0x623B40bC298A94ff6596ADa2B0d9073b09e6eD85
 https://explorer.mycelium.calibration.node.glif.io/address/0x6B4c696B623FA9A2A6D5b6E9101Ef19CD973bc3C
+
 
 # Arbitrum:
 
